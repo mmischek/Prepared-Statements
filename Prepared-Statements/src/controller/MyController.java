@@ -1,10 +1,13 @@
 package controller;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.URL;
 import java.sql.*;
 import java.util.ResourceBundle;
 import org.postgresql.ds.PGSimpleDataSource;
-import org.postgresql.util.PSQLException;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -18,6 +21,8 @@ import javafx.util.Callback;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 
 public class MyController implements Initializable {
 
@@ -40,7 +45,7 @@ public class MyController implements Initializable {
 	@FXML
 	private TableView gamerTableView, updateTableView;
 	@FXML
-	private TextField dbIP, dbName, dbUser, dbPass, inputNumber, nummerTF, bezeichnungTF, gewichtTF;
+	private TextField inputNumber, nummerTF, bezeichnungTF, gewichtTF;
 	@FXML
 	private TextField nummerTFI, bezeichnungTFI, gewichtTFI;
 
@@ -56,39 +61,46 @@ public class MyController implements Initializable {
 	 */
 	public void handleButtonAction(ActionEvent event) {
 
-		System.out.println("Connecting to database...");
-
-		data = FXCollections.observableArrayList();
-
-		// data source configuration
-		dataSource = new PGSimpleDataSource();
-		dataSource.setServerName(dbIP.getText());
-		dataSource.setDatabaseName(dbName.getText());
-		dataSource.setUser(dbUser.getText());
-		dataSource.setPassword(dbPass.getText());
-
-		// building up the connection to the database
 		try {
-			connection = dataSource.getConnection();
-			// prepare statement and execute it
-			Statement statement = connection.createStatement();
-			rset = statement.executeQuery("select * from produkt");
-
-			label.setText("connected!");
-			System.out.println("successfully connected!");
-
-			getTable();
-
-			// error handling with error messages
-		} catch (PSQLException e) {
-			System.err.println("PSQL Error");
-			label.setText("SQL Error");
-			e.printStackTrace(System.err);
-		} catch (SQLException se) {
-			System.err.println("SQL Error");
-			label.setText("SQL Error");
-			se.printStackTrace(System.err);
+			preferences();
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.err.println("Error");
 		}
+		
+//		System.out.println("Connecting to database...");
+//
+//		data = FXCollections.observableArrayList();
+//
+//		// data source configuration
+//		dataSource = new PGSimpleDataSource();
+//		dataSource.setServerName(dbIP.getText());
+//		dataSource.setDatabaseName(dbName.getText());
+//		dataSource.setUser(dbUser.getText());
+//		dataSource.setPassword(dbPass.getText());
+//
+//		// building up the connection to the database
+//		try {
+//			connection = dataSource.getConnection();
+//			// prepare statement and execute it
+//			Statement statement = connection.createStatement();
+//			rset = statement.executeQuery("select * from produkt");
+//
+//			label.setText("connected!");
+//			System.out.println("successfully connected!");
+//
+//			getTable();
+//
+//			// error handling with error messages
+//		} catch (PSQLException e) {
+//			System.err.println("PSQL Error");
+//			label.setText("SQL Error");
+//			e.printStackTrace(System.err);
+//		} catch (SQLException se) {
+//			System.err.println("SQL Error");
+//			label.setText("SQL Error");
+//			se.printStackTrace(System.err);
+//		}
 	}
 
 	/**
@@ -427,6 +439,48 @@ public class MyController implements Initializable {
 			se.printStackTrace(System.err);
 		}
 	}
+	
+	public void preferences() throws IOException{
+		
+		FileChooser chooser = new FileChooser();
+		ExtensionFilter sef = new ExtensionFilter("Text file","txt");
+		chooser.setSelectedExtensionFilter(sef);
+		chooser.setTitle("Select text file...");
+		File selectedDirectory = chooser.showOpenDialog(null);
+		System.out.println(selectedDirectory.getAbsolutePath());
+		
+	    FileReader fr;
+	    try{
+	    	fr = new FileReader(selectedDirectory.getAbsolutePath());
+	    } catch(NullPointerException e2){
+	    	fr = new FileReader("");
+	    }
+	    
+		BufferedReader br = new BufferedReader(fr);
+		
+		String x = "";
+		for(;x != null;){
+			x = br.readLine();
+			if(x!=null)
+				System.out.println(x);
+		}
+		br.close();
+		
+//		String saver[] = new String [save.size()+1];
+//		int y = 0;
+//		for (Object o : save){
+//			saver[y] = (String) o;
+//			y++;
+//		}
+//		
+//		list.removeAll(list);
+//		
+//		for(int r=0;save.size()>r;r++){
+//			list.add(saver[r]);
+//		}
+//		this.woerter();
+	}
+	
 
 	/**
 	 * initialize necessary method of Initializable
