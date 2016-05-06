@@ -8,6 +8,8 @@ import java.net.URL;
 import java.sql.*;
 import java.util.ResourceBundle;
 import org.postgresql.ds.PGSimpleDataSource;
+import org.postgresql.util.PSQLException;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -36,7 +38,7 @@ public class MyController implements Initializable {
 	@FXML
 	private Label label, insertLabel;
 	@FXML
-	private Button loadData, chooseButton, updateButton, disconnect, deleteButton, updateTable, insertButton;
+	private Button loadData, chooseButton, updateButton, disconnect, deleteButton, updateTable, insertButton, loadFile;
 	@FXML
 	private ProgressIndicator progress;
 	@FXML
@@ -45,7 +47,7 @@ public class MyController implements Initializable {
 	@FXML
 	private TableView gamerTableView, updateTableView;
 	@FXML
-	private TextField inputNumber, nummerTF, bezeichnungTF, gewichtTF;
+	private TextField inputNumber, nummerTF, bezeichnungTF, gewichtTF, dbIP, dbName, dbUser, dbPass;
 	@FXML
 	private TextField nummerTFI, bezeichnungTFI, gewichtTFI;
 
@@ -61,46 +63,40 @@ public class MyController implements Initializable {
 	 */
 	public void handleButtonAction(ActionEvent event) {
 
-		try {
-			preferences();
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.err.println("Error");
-		}
 		
-//		System.out.println("Connecting to database...");
-//
-//		data = FXCollections.observableArrayList();
-//
-//		// data source configuration
-//		dataSource = new PGSimpleDataSource();
-//		dataSource.setServerName(dbIP.getText());
-//		dataSource.setDatabaseName(dbName.getText());
-//		dataSource.setUser(dbUser.getText());
-//		dataSource.setPassword(dbPass.getText());
-//
-//		// building up the connection to the database
-//		try {
-//			connection = dataSource.getConnection();
-//			// prepare statement and execute it
-//			Statement statement = connection.createStatement();
-//			rset = statement.executeQuery("select * from produkt");
-//
-//			label.setText("connected!");
-//			System.out.println("successfully connected!");
-//
-//			getTable();
-//
-//			// error handling with error messages
-//		} catch (PSQLException e) {
-//			System.err.println("PSQL Error");
-//			label.setText("SQL Error");
-//			e.printStackTrace(System.err);
-//		} catch (SQLException se) {
-//			System.err.println("SQL Error");
-//			label.setText("SQL Error");
-//			se.printStackTrace(System.err);
-//		}
+		System.out.println("Connecting to database...");
+
+		data = FXCollections.observableArrayList();
+
+		// data source configuration
+		dataSource = new PGSimpleDataSource();
+		dataSource.setServerName(dbIP.getText());
+		dataSource.setDatabaseName(dbName.getText());
+		dataSource.setUser(dbUser.getText());
+		dataSource.setPassword(dbPass.getText());
+
+		// building up the connection to the database
+		try {
+			connection = dataSource.getConnection();
+			// prepare statement and execute it
+			Statement statement = connection.createStatement();
+			rset = statement.executeQuery("select * from produkt");
+
+			label.setText("connected!");
+			System.out.println("successfully connected!");
+
+			getTable();
+
+			// error handling with error messages
+		} catch (PSQLException e) {
+			System.err.println("PSQL Error");
+			label.setText("SQL Error");
+			e.printStackTrace(System.err);
+		} catch (SQLException se) {
+			System.err.println("SQL Error");
+			label.setText("SQL Error");
+			se.printStackTrace(System.err);
+		}
 	}
 
 	/**
@@ -440,11 +436,12 @@ public class MyController implements Initializable {
 		}
 	}
 	
-	public void preferences() throws IOException{
+	@FXML
+	public void loadFile(ActionEvent event) throws IOException {
 		
 		FileChooser chooser = new FileChooser();
-		ExtensionFilter sef = new ExtensionFilter("Text file","txt");
-		chooser.setSelectedExtensionFilter(sef);
+		ExtensionFilter sef = new ExtensionFilter("Text file","*.txt");
+		chooser.getExtensionFilters().addAll(sef);
 		chooser.setTitle("Select text file...");
 		File selectedDirectory = chooser.showOpenDialog(null);
 		System.out.println(selectedDirectory.getAbsolutePath());
@@ -458,27 +455,30 @@ public class MyController implements Initializable {
 	    
 		BufferedReader br = new BufferedReader(fr);
 		
-		String x = "";
-		for(;x != null;){
-			x = br.readLine();
-			if(x!=null)
-				System.out.println(x);
+		String ip = dbIP.getText();
+		String name = dbName.getText();
+		String user = dbUser.getText();
+		String pass = dbPass.getText();
+		
+		if(br.readLine().equals("host:")){
+			ip = br.readLine();
+			System.err.println(ip);
+		} 
+		if(br.readLine().equals("database:")){
+			name = br.readLine();
+		} 
+		if(br.readLine().equals("user:")){
+			user = br.readLine();
+		} 
+		if(br.readLine().equals("password:")){
+			pass = br.readLine();
 		}
 		br.close();
 		
-//		String saver[] = new String [save.size()+1];
-//		int y = 0;
-//		for (Object o : save){
-//			saver[y] = (String) o;
-//			y++;
-//		}
-//		
-//		list.removeAll(list);
-//		
-//		for(int r=0;save.size()>r;r++){
-//			list.add(saver[r]);
-//		}
-//		this.woerter();
+		dbIP.setText(ip);
+		dbName.setText(name);
+		dbUser.setText(user);
+		dbPass.setText(pass);
 	}
 	
 
