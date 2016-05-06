@@ -1,8 +1,8 @@
 host:
 192.168.0.23
 database:
-fussballverein
+schokofabrik
 user:
-vereinadmin
+schokoUser
 password:
-vereinPass
+schokoUser
